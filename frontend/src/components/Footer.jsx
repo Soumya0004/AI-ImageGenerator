@@ -7,7 +7,7 @@ const Footer = () => {
          <Link to="/">
         <img src={assets.logo} alt="Logo" className="w-28 sm:w-32  lg:w-30  " />
       </Link>
-        <p className='flex-1 border-l border-black pl-4 text-sm max-sm:hidden'>  All right reserved. Copyright   @Imagify</p>
+        <p className='flex-1 border-l border-black pl-4 text-sm max-sm:hidden'>  All right reserved. Copyright   <span className='font-semibold'>Gen Ai</span></p>
         
         <div className='flex gap-2.5'>
             <img src={assets.facebook_icon} alt=""  width={35}/>
