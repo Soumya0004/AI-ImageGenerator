@@ -6,40 +6,42 @@ import connectDB from "./Config/mongodb.js";
 import userRouter from "./routes/user.routes.js";
 import imgRouter from "./routes/img.routes.js";
 
-const PORT = process.env.PORT || 5000;
+// Initialize express app
 const app = express();
+const PORT = process.env.PORT || 5000;
 
-// Allow only your Netlify frontend
-const allowedOrigins = ['https://genai04.netlify.app/']; 
+// ✅ Connect to MongoDB before starting the server
+connectDB();
 
-app.use(cors({
+// ✅ Middleware: Parse JSON
+app.use(express.json());
+
+// ✅ CORS configuration
+const allowedOrigins = ['https://genai04.netlify.app'];
+
+const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
     } else {
-      return callback(new Error("CORS policy does not allow this origin"), false);
+      callback(new Error("CORS policy does not allow this origin"), false);
     }
   },
   credentials: true,
-}));
+};
 
-// Middlewares
-app.use(express.json());
+app.use(cors(corsOptions));
 
-// Connect to MongoDB
-connectDB();
-
-// Routes
+// ✅ API Routes
 app.use('/api/user', userRouter);
 app.use('/api/image', imgRouter);
 
-// Health check route
+// ✅ Health Check
 app.get("/", (req, res) => {
   res.send("Hello from server");
 });
 
-// Start server
+// ✅ Start Server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
