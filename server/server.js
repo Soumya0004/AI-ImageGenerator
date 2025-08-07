@@ -1,47 +1,41 @@
 import express from "express";
 import 'dotenv/config';
 import cors from "cors";
-
 import connectDB from "./Config/mongodb.js";
+
 import userRouter from "./routes/user.routes.js";
 import imgRouter from "./routes/img.routes.js";
 
-// Initialize express app
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ✅ Connect to MongoDB before starting the server
-connectDB();
-
-// ✅ Middleware: Parse JSON
-app.use(express.json());
-
-// ✅ CORS configuration
+// ✅ CORS config
 const allowedOrigins = ['https://genai04.netlify.app'];
 
-const corsOptions = {
+app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("CORS policy does not allow this origin"), false);
-    }
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error("CORS not allowed"), false);
   },
   credentials: true,
-};
+}));
 
-app.use(cors(corsOptions));
+app.use(express.json());
 
-// ✅ API Routes
-app.use('/api/user', userRouter);
-app.use('/api/image', imgRouter);
+// ✅ DB connection
+connectDB();
 
-// ✅ Health Check
+// ✅ Routes (make sure these paths are correct)
+app.use("/api/user", userRouter);
+app.use("/api/image", imgRouter);
+
+// ✅ Health check route
 app.get("/", (req, res) => {
-  res.send("Hello from server");
+  res.send("Server is running.");
 });
 
-// ✅ Start Server
+// ✅ Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

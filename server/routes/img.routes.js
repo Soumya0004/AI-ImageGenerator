@@ -1,11 +1,9 @@
-import express from 'express'
-import generateImg from '../Controles/imgControl.js'
-import userAuth from '../middlewares/auth.js'
+import express from 'express';
+import generateImg from '../Controles/imgControl.js';
+import userAuth from '../middlewares/auth.js';
 
+const imgRouter = express.Router();
 
-const imgRouter = express.Router()
+imgRouter.post('/generateimg', userAuth, generateImg);
 
-
-imgRouter.post('/generateimg',userAuth,generateImg)
-
-export default imgRouter
+export default imgRouter;
