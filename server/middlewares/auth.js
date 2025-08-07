@@ -17,14 +17,9 @@ const userAuth = async (req, res, next) => {
 
         // console.log("Decoded token:", tokenDecode);
 
-        // Ensure that req.body exists before attaching userId
-        if (!req.body) {
-            req.body = {};  // Create the body if it doesn't exist
-        }
-
         // If token has an id, proceed with the request
         if (tokenDecode.id) {
-            req.body.userId = tokenDecode.id;  // Attach userId to the request body for use in subsequent routes
+            req.user = { id: tokenDecode.id };  // Attach user object to request
             next();  // Pass control to the next middleware or route handler
         } else {
             // console.log("Token is not valid: Missing ID");

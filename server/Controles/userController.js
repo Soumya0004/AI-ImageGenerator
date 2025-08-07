@@ -72,30 +72,37 @@ const loginUser = async (req, res) => {
 
 const userCredits = async (req, res) => {
     try {
-        const {userId}  =req.body
+        const userId = req.user.id; // Get from auth middleware
 
-        const user = await userModel.findById(userId)
-       res.json({success:true,credits: user.creditBalance ,user:{name:user.name}})         
+        const user = await userModel.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        
+        res.json({success: true, credits: user.creditBalance || 0, user: {name: user.name}});         
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: error.message });
-        
     }
 }
 
 
 const razorpayInstance = new razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
+    
     key_secret: process.env.RAZORPAY_KEY_SECRET,
+
   });
+
 
  // PAYMENT CREATION CONTROLLER
 const paymentRazorpay = async (req, res) => {
     try {
-      const { userId, planId } = req.body;
+      const { planId } = req.body;
+      const userId = req.user.id; // Get from auth middleware
   
-      if (!userId || !planId) {
-        return res.status(400).json({ message: "Missing userId or planId" });
+      if (!planId) {
+        return res.status(400).json({ message: "Missing planId" });
       }
   
       const userData = await userModel.findById(userId);
@@ -140,12 +147,13 @@ const paymentRazorpay = async (req, res) => {
         receipt: newTransaction._id.toString()
       };
   
-      razorpayInstance.orders.create(options, (error, order) => {
-        if (error) {
-          return res.status(500).json({ message: error.message });
-        }
+      try {
+        const order = await razorpayInstance.orders.create(options);
         res.json({ success: true, order });
-      });
+      } catch (error) {
+        console.error("Razorpay order creation error:", error);
+        return res.status(500).json({ message: "Failed to create payment order" });
+      }
   
     } catch (error) {
       console.error("Payment creation error:", error);
@@ -185,7 +193,7 @@ const paymentRazorpay = async (req, res) => {
           return res.status(404).json({ message: "User not found" });
         }
   
-        const creditBalance = userData.creditBalance + transationData.credits;
+        const creditBalance = (userData.creditBalance || 0) + transationData.credits;
   
         await userModel.findByIdAndUpdate(userData._id, { creditBalance });
         await transationModel.findByIdAndUpdate(transationData._id, { payment: true });
@@ -196,7 +204,10 @@ const paymentRazorpay = async (req, res) => {
           message: "Credits added successfully"
         });
       } else {
-        return res.json({ success: false, message: "Payment not completed" });
+        return res.json({ 
+          success: false, 
+          message: `Payment not completed. Status: ${orderInfo.status}` 
+        });
       }
   
     } catch (error) {
@@ -205,4 +216,4 @@ const paymentRazorpay = async (req, res) => {
     }
   };
   
-export   {loginUser,registerUser ,userCredits,paymentRazorpay,verifyRazorpay}
+export { loginUser, registerUser, userCredits, paymentRazorpay, verifyRazorpay }

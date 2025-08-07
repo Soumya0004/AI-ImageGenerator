@@ -14,7 +14,7 @@ const AppContextProvider=(props)=>{
 
     const [credit, setcredit] = useState(false)
 
-    const backendurl = import.meta.env.VITE_BACKEND_URL
+    const backendurl = import.meta.env.VITE_API_URL
 
     const navigate= useNavigate()
 

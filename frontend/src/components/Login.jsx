@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { assets } from "../assets/assets";
 import { Appcontext } from "../Context/Appcontext";
 import {  motion } from "motion/react";
-import axios from 'axios'
+import axiosInstance from '../Context/axiosInstance';
 import toast from "react-hot-toast";
 
 const Login = () => {
@@ -19,7 +19,7 @@ const Login = () => {
     try {
 
       if (state === "Login") {
-        const {data}=await  axios.post(backendurl + '/api/user/login', {email,password})
+        const {data}=await  axiosInstance.post('/api/user/login', {email,password})
         if (data.success) {
           settoken(data.token) 
           setuser(data.user)
@@ -30,7 +30,7 @@ const Login = () => {
           
         }
       }else{
-        const {data}=await  axios.post(backendurl + '/api/user/register', {name,email,password})
+        const {data}=await  axiosInstance.post('/api/user/register', {name,email,password})
         if (data.success) {
           settoken(data.token) 
           setuser(data.user)
