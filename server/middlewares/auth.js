@@ -1,37 +1,34 @@
-import userModel from "../models/user.model.js";
+import jwt from "jsonwebtoken";
 
-const generateImg = async (req, res) => {
+const userAuth = async (req, res, next) => {
+   
+    let token = req.headers.token 
+    // || req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
+        return res.status(401).json({ success: false, message: "Not Authorized. Login Again" });
+    }
+
     try {
-        const userId = req.userId; // ✅ Now available from middleware
+        // console.log("Token received:", token);
 
-        // Check user credits
-        const user = await userModel.findById(userId);
-        if (!user) {
-            return res.status(404).json({ success: false, message: "User not found" });
+        // Decode and verify the token
+        const tokenDecode = jwt.verify(token, process.env.JWT_SECRET);
+
+        // console.log("Decoded token:", tokenDecode);
+
+        // If token has an id, proceed with the request
+        if (tokenDecode.id) {
+            req.user = { id: tokenDecode.id };  // Attach user object to request
+            next();  // Pass control to the next middleware or route handler
+        } else {
+            // console.log("Token is not valid: Missing ID");
+            return res.status(401).json({ success: false, message: "Not Authorized. Login Again" });
         }
-
-        if (user.credits <= 0) {
-            return res.status(403).json({ success: false, message: "Insufficient credits" });
-        }
-
-        // Deduct credit
-        user.credits -= 1;
-        await user.save();
-
-        // 🖼️ Call your AI image generation logic here
-        // const imageUrl = await aiService.generate(req.body.prompt);
-
-        // For now, send dummy response
-        res.status(200).json({
-            success: true,
-            message: "Image generated successfully",
-            // imageUrl
-        });
-
     } catch (error) {
-        console.error("Image generation error:", error.message);
-        res.status(500).json({ success: false, message: "Server error" });
+        console.error("JWT Error:", error);
+        res.status(401).json({ success: false, message: "Invalid token" });
     }
 };
 
-export default generateImg;
+export default userAuth;
