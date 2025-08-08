@@ -1,25 +1,37 @@
-import jwt from "jsonwebtoken";
+import userModel from "../Models/userModel.js";
 
-const userAuth = async (req, res, next) => {
-    let token = req.headers.token || req.headers.authorization?.split(" ")[1];
-
-    if (!token) {
-        return res.status(401).json({ success: false, message: "Not Authorized. Login Again" });
-    }
-
+const generateImg = async (req, res) => {
     try {
-        const tokenDecode = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = req.userId; // ✅ Now available from middleware
 
-        if (tokenDecode.id) {
-            req.user = { id: tokenDecode.id };
-            next();
-        } else {
-            return res.status(401).json({ success: false, message: "Not Authorized. Login Again" });
+        // Check user credits
+        const user = await userModel.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
         }
+
+        if (user.credits <= 0) {
+            return res.status(403).json({ success: false, message: "Insufficient credits" });
+        }
+
+        // Deduct credit
+        user.credits -= 1;
+        await user.save();
+
+        // 🖼️ Call your AI image generation logic here
+        // const imageUrl = await aiService.generate(req.body.prompt);
+
+        // For now, send dummy response
+        res.status(200).json({
+            success: true,
+            message: "Image generated successfully",
+            // imageUrl
+        });
+
     } catch (error) {
-        console.error("JWT Error:", error.message);
-        res.status(401).json({ success: false, message: "Invalid token" });
+        console.error("Image generation error:", error.message);
+        res.status(500).json({ success: false, message: "Server error" });
     }
 };
 
-export default userAuth;
+export default generateImg;
