@@ -1,5 +1,5 @@
 import express from "express";
-import 'dotenv/config';
+import "dotenv/config";
 import cors from "cors";
 import connectDB from "./Config/mongodb.js";
 
@@ -9,20 +9,17 @@ import imgRouter from "./routes/img.routes.js";
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// CORS configuration
-const allowedOrigins = [
-  'https://genai04.netlify.app', // Production frontend
-  'http://localhost:5173'        // Local development
-];
-
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true); 
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error("CORS not allowed"), false);
-  },
-  credentials: true,
-}));
+// ✅ CORS configuration - cleaner and safer
+app.use(
+  cors({
+    origin: [
+      "https://genai04.netlify.app", // production
+      "http://localhost:5173"        // development
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
+  })
+);
 
 app.use(express.json());
 
@@ -40,5 +37,5 @@ app.get("/", (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`✅ Server running on port ${PORT}`);
 });
