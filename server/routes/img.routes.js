@@ -1,9 +1,10 @@
-import express from 'express';
-import generateImg from '../Controles/imgControl.js';
-import userAuth from '../middlewares/auth.js';
+import express from "express";
+import generateImg from "../controllers/generateImg.js";
+import { auth } from "../middleware/auth.js";
 
-const imgRouter = express.Router();
+const router = express.Router();
 
-imgRouter.post('/generateimg', userAuth, generateImg);
+// Protected route
+router.post("/generateimg", auth, generateImg);
 
-export default imgRouter;
+export default router;

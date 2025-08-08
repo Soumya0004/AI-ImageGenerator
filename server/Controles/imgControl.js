@@ -1,4 +1,3 @@
-// controllers/generateImg.js
 import userModel from "../models/user.model.js";
 import FormData from "form-data";
 import axios from "axios";
@@ -6,7 +5,7 @@ import axios from "axios";
 const generateImg = async (req, res) => {
   try {
     const { prompt } = req.body;
-    const userId = req.userId; // ✅ get from token
+    const userId = req.userId; // ✅ from token
 
     if (!prompt) {
       return res.json({ success: false, message: "Missing prompt" });

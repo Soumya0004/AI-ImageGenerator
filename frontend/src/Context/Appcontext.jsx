@@ -1,8 +1,7 @@
-// AppContextProvider.jsx
-import axios from "axios";
 import { createContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../utils/axiosInstance";
 
 export const Appcontext = createContext();
 
@@ -12,31 +11,24 @@ const AppContextProvider = (props) => {
   const [token, settoken] = useState(localStorage.getItem("token"));
   const [credit, setcredit] = useState(false);
 
-  const backendurl = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
 
   const loadCreaditsData = async () => {
     try {
-      const { data } = await axios.get(backendurl + "/api/user/credits", {
-        headers: { token },
-      });
+      const { data } = await axiosInstance.get("/api/user/credits");
       if (data.success) {
         setcredit(data.credits);
         setuser(data.user);
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error(error.message);
     }
   };
 
   const generateimg = async (prompt) => {
     try {
-      const { data } = await axios.post(
-        backendurl + "/api/image/generateimg",
-        { prompt }, // ✅ only prompt now
-        { headers: { token } }
-      );
+      const { data } = await axiosInstance.post("/api/image/generateimg", { prompt });
 
       if (data.success) {
         loadCreaditsData();
@@ -70,7 +62,7 @@ const AppContextProvider = (props) => {
     setuser,
     showLogin,
     setshowLogin,
-    backendurl,
+    backendurl: import.meta.env.VITE_API_URL,
     token,
     settoken,
     credit,
@@ -81,7 +73,10 @@ const AppContextProvider = (props) => {
   };
 
   return (
-    <Appcontext.Provider value={value}>{props.children}</Appcontext.Provider>
+    <Appcontext.Provider value={value}>
+      {props.children}
+    </Appcontext.Provider>
   );
 };
+
 export default AppContextProvider;
